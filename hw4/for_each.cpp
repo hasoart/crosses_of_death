@@ -4,6 +4,10 @@
 #include <thread>
 #include <future>
 #include <numeric>
+#include <chrono>
+
+using steady_clock_t = std::chrono::steady_clock;
+using namespace std::chrono_literals;
 
 template<class It, class UnaryFunction>
 void for_each(It begin, It end, UnaryFunction &f) {
@@ -28,6 +32,8 @@ void for_each(It begin, It end, UnaryFunction &f) {
         end,
         f));
 
+    for (auto& handle: handles)
+        handle.wait();
 }
 
 int main() {
@@ -37,7 +43,8 @@ int main() {
     std::vector<int> arr(size);
     std::iota(std::begin(arr), std::end(arr), 0);
     
-    for_each(std::begin(arr), std::end(arr), [](auto& x){ x = x * x; });
+    for_each(std::begin(arr), std::end(arr),
+        [](auto& x){ x = x * x; });
 
     const auto line_max = 10;
     unsigned counter = 1;
